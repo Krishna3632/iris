@@ -1,12 +1,27 @@
 from flask import Flask, render_template, request
 import joblib
+import requests
 import os
 
 app = Flask(__name__)
 
+# External URL where your model is stored (Google Drive, AWS S3, etc.)
+MODEL_URL = "https://huggingface.co/krishnash16/Iris/resolve/main/model.pkl"
+MODEL_PATH = "model.pkl"
+
+# Function to download the model if it doesn't exist
+def download_model():
+    if not os.path.exists(MODEL_PATH):
+        print("Downloading model...")
+        response = requests.get(MODEL_URL)
+        with open(MODEL_PATH, "wb") as f:
+            f.write(response.content)
+        print("Model downloaded!")
+
+download_model()  # Ensure model is available
+
 # Load the model
-model_path = os.path.join(os.path.dirname(__file__), "iris/models/model.pkl")
-iris_model = joblib.load(model_path)
+iris_model = joblib.load(MODEL_PATH)
 
 @app.route('/', methods=['GET', 'POST'])
 def iris():
